@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录</title>
+  <style>
+  :root {
+  --myshadow:#3b2700;
+  --balck: #503a0e;
+  --balck_alpha: #3b27003d;
+  --white: #e6e6e6;
+  --gray: #555555;
+  --blue:#1091db;
+  --shadow:#3b270085;
+  --fsize_big:32px;
+  --fsize_middle:16px;
+  --fsize_small:14px;
+  --my-boder-radius:4px;
+}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--balck);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .box {
+      background: var(--white);
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px var(--balck_alpha);
+      width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .box input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--gray);
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .box input:focus {
+      border-color: var(--balck);
+    }
+    .btn-primary {
+      background: var(--balck);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #357abd; }
+    .btn-small-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .btn-small {
+      background: transparent;
+      border: none;
+      color: var(--gray);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-small:hover {
+      background: var(--white);
+      color: var(--balck);
+    }
+    #status {
+      text-align: center;
+      color: #e74c3c;
+      font-size: 14px;
+      min-height: 20px;
+    }
+    /* 展开区域 – 默认折叠 */
+    .extra-fields {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .extra-fields.open {
+      max-height: 160px; /* 足够容纳两个输入框 + 按钮 */
+    }
+    .extra-fields input {
+      padding: 10px 14px;
+      font-size: 14px;
+    }
+    .extra-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .extra-actions button {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s;
+    }
+    .btn-confirm {
+      background: #27ae60;
+      color: white;
+    }
+    .btn-confirm:hover { background: #1e8449; }
+    .btn-cancel {
+      background: #ecf0f1;
+      color: #333;
+    }
+    .btn-cancel:hover { background: #d5dbdb; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <input id="username" placeholder="用户名" />
+    <input id="password" type="password" placeholder="密码" />
+
+    <!-- 登录按钮 (大) -->
+    <!-- <form onkeydown="handleEnter(event)"> -->
+    <button class="btn-primary" id="loginBtn" onclick="login()">登录</button>
+    <!-- </form> -->
+  
+    <!-- 三个小按钮 -->
+    <div class="btn-small-group">
+      <button class="btn-small" onclick="regist()">注册</button>
+      <button class="btn-small" onclick="showModifyPassword()">修改密码</button>
+      <button class="btn-small" onclick="showDeleteAccount()">删除账户</button>
+    </div>
+
+    <!-- 状态提示 -->
+    <div id="status"></div>
+
+    <!-- 展开的额外字段区域 -->
+    <div class="extra-fields" id="extraFields">
+      <input id="field1" type="password" placeholder="" />
+      <input id="field2" type="password" placeholder="" />
+      <div class="extra-actions">
+        <button class="btn-confirm" id="extraConfirmBtn" onclick="executeExtraAction()">确认</button>
+        <button class="btn-cancel" onclick="hideExtraFields()">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 当前展开的操作类型：'modify' 或 'delete'
+    let currentAction = null;
+
+    // ---------- 现有函数 login 和 regist (保持不变) ----------
+    async function login() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      document.getElementById("status").textContent = "logging in...";
+
+      try {
+        const res = await fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById("status").textContent = "成功";
+          const token = data.token;
+          localStorage.setItem('token', token); 
+          localStorage.setItem('username', username);
+          console.log(localStorage.getItem('username'));
+          window.location.href = "/files";
+          console.log(localStorage.getItem('token'));
+        } else {
+          document.getElementById("status").textContent = "失败";
+        }
+      } catch (e) {
+        document.getElementById("status").textContent = "错误";
+      }
+    }
+
+    async function regist() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      document.getElementById("status").textContent = "registing...";
+
+      try {
+        const res = await fetch("/login/regist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (res.ok) {
+          document.getElementById("status").textContent = "Regist success";
+        } else {
+          const errMsg = await res.text();
+          document.getElementById("status").textContent = errMsg;
+        }
+      } catch (e) {
+        document.getElementById("status").textContent = "Regist error";
+      }
+    }
+    
+    async function newpwd() {
+        const username = document.getElementById("username").value;
+        const currentPassword = document.getElementById("password").value;
+        const newPassword = document.getElementById("field1").value;
+        const confirmPassword = document.getElementById("field2").value;
+        document.getElementById("status").textContent = "修改密码...";
+        // 前端验证
+        if (newPassword !== confirmPassword) {
+            document.getElementById("status").textContent = "两次输入的新密码不一致";
+            return;
+        }
+        try {
+            // 将新密码作为 URL 参数传递
+            const url = `/login/updatepwd?newpwd=${encodeURIComponent(newPassword)}`;
+            const res = await fetch(url, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password: currentPassword })
+            });
+            if (res.ok) {
+            document.getElementById("status").textContent = "密码修改成功";
+            hideExtraFields();
+            } else {
+            const errMsg = await res.text();
+            document.getElementById("status").textContent = errMsg;
+            }
+        } catch (e) {
+            document.getElementById("status").textContent = "修改密码错误";
+        }
+        }
+    async function deleteAccount() {
+
+      const username = document.getElementById("username").value;
+        const currentPassword = document.getElementById("password").value;
+        const retypePassword = document.getElementById("field1").value;
+        const confirmPassword = document.getElementById("field2").value;
+        document.getElementById("status").textContent = "删除账户...";
+      if (currentPassword != confirmPassword || currentPassword != retypePassword) {
+            document.getElementById("status").textContent = "密码不一致";
+            return;
+        }
+        try {
+            const res = await fetch("login/delete", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username:username, password: currentPassword })
+            });
+            if (res.ok) {
+            document.getElementById("status").textContent = "账户已删除";
+            hideExtraFields();
+            } else {
+            const errMsg = await res.text();
+            document.getElementById("status").textContent = errMsg;
+            }
+        } catch (e) {
+            document.getElementById("status").textContent = "删除账户失败";
+        }
+    }
+
+
+    // ---------- 新增辅助函数 ----------
+    function executeExtraAction() {
+    if (currentAction === 'modify') {
+        newpwd();
+    } else if (currentAction === 'delete') {
+        deleteAccount();
+    } else {
+        console.warn('未知操作');
+    }
+    }
+    
+    
+    function hideExtraFields() {
+      const extra = document.getElementById("extraFields");
+      extra.classList.remove("open");
+      currentAction = null;
+      // 清空额外输入框
+      document.getElementById("field1").value = "";
+      document.getElementById("field2").value = "";
+    }
+
+    function showModifyPassword() {
+      // 先收起可能已经展开的其他操作
+      hideExtraFields();
+
+      // 设置占位符和确认按钮文字
+      document.getElementById("field1").placeholder = "新密码";
+      document.getElementById("field2").placeholder = "确认新密码";
+      document.getElementById("extraConfirmBtn").textContent = "确认修改";
+      currentAction = "modify";
+
+      // 展开
+      document.getElementById("extraFields").classList.add("open");
+    }
+
+    function showDeleteAccount() {
+      hideExtraFields();
+
+      document.getElementById("field1").placeholder = "当前密码";
+      document.getElementById("field2").placeholder = "再次输入当前密码";
+      document.getElementById("extraConfirmBtn").textContent = "确认删除";
+      currentAction = "delete";
+
+      document.getElementById("extraFields").classList.add("open");
+    }
+  const loginBtn = document.getElementById("loginBtn");
+  document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') loginBtn.click();
+    });
+  </script>
+</body>
+</html>
