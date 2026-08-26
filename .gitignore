@@ -1,5 +1,8 @@
 /target
 *test*
-.vscode
+.vscode/
 node_modules
 logo.ai
+conf
+db.txt
+bkp

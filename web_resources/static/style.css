@@ -1,20 +1,18 @@
-
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>共享文件</title>
-<style>
 :root {
+  --ironblack_dark:#0d111c;
+  --ironblack:#1B202D;
+  --ironblack_light:#373d4c;
+  --ironblack_alpha:#1b202da7;
   --myshadow:#3b2700;
-  --balck: #503a0e;
+  --balck: #6f4e1d;
+  --balck_light: #a86500;
   --balck_alpha: #412b018a;
   --white: #e6e6e6;
   --gray: #555555;
   --blue:#1091db;
   --shadow:#3b270085;
   --fsize_big:32px;
+  --fsize_larger:24px;
   --fsize_middle:16px;
   --fsize_small:14px;
   --my-boder-radius:4px;
@@ -30,15 +28,35 @@ body {
 }
 
 /* 顶部工具栏 */
+
+.layout {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+}
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+  background: var(--white);
+}
+
+.file-container {
+  flex: 1;
+  overflow: auto;
+}
+
 .toolbar {
   display: flex;
   align-items: center;
   padding: 12px 12px;
-  background: var(--white);
-  border-top: 14px solid var(--balck);
-  gap: 4px;
+  background: var(--ironblack);
+  border: 2px ridge var(--ironblack_light);
+  gap: 6px;
   flex-shrink: 0;
 }
+
 .toolbar .path {
   flex: 1;
   font-size: var(--fsize_middle);
@@ -48,19 +66,27 @@ body {
   /* overflow: hidden; */
   /* text-overflow: ellipsis; */
   /* white-space: nowrap; */
-  border: 2px solid var(--balck);
-  border-radius: var(--my-boder-radius);
+  min-width: 36px;
+  border: 2px solid var(--ironblack_light);
+  /* border-radius: var(--my-boder-radius); */
 }
 .toolbar .btn {
-  background: var(--balck);
+  /* background: var(--balck);
   border: 1px solid var(--white);
   padding: 6px 16px;
-  /* border-radius: 4px; */
   color: var(--white);
   cursor: pointer;
   font-size: var(--fsize_middle);
   transition: all 0.15s;
-  border-radius: var(--my-boder-radius);
+  border-radius: var(--my-boder-radius); */
+
+  padding: 4px 4px;
+  background-color: var(--balck);
+  cursor: pointer;
+  font-size:  var(--fsize_middle);
+  color: var(--white);
+  border: outset 2px var(--myshadow);
+  text-align: center;
 }
 .toolbar .btn:hover { background: var(--blue); }
 .toolbar .btn.primary { background: var(--balck); color: var(--white); border-color: var(--balck); }
@@ -83,7 +109,7 @@ body {
   color: var(--white);
   /* border-bottom: 2px solid var(--white);
   border-top: 2px solid var(--white); */
-  background-color: var(--balck);
+  background-color: var(--ironblack);
   padding: 6px 10px;
 }
 /* .file-table th td{
@@ -93,7 +119,7 @@ body {
   color:var(--white),
 } */
 .file-table td {
-  padding: 8px;
+  padding: 4px 2px;
   border-bottom: 1px solid var(--myshadow);
   text-align: center;
   /* vertical-align: middle; */
@@ -118,10 +144,10 @@ body {
   cursor:pointer;
   background-color: var(--blue);
 }
-.file-table tr:hover th {
+/* .file-table tr:hover th {
   background-color: var(--balck) !important;
   cursor: default;
-}
+} */
 
 .file-icon {
   margin-right: 8px;
@@ -129,19 +155,11 @@ body {
   vertical-align: middle;
 }
 
-html, body {
-  height: 100%;
-  margin: 0;
-}
-.layout {
-  display: flex;
-  height: 100vh;
-  width: 100%;
-}
-/* 左侧栏 */
+
+
 .sidebar {
-  width: 200px;
-  background: var(--balck);
+  width: 15%;
+  background: var(--ironblack);
   color: var(--white);
   padding-top: 12px;
   padding-bottom: 12px;
@@ -149,10 +167,10 @@ html, body {
   padding-left: 12px;
   box-sizing: border-box;
   position: relative;
-  height: 100%;
-  /* border-right: solid 2px var(--myshadow); */
+  /* height: 100%; */
+  /* border-right: solid 2px var(--white); */
   /* border-left: solid 12px var(--myshadow); */
-  gap:12px;
+  /* gap:12px; */
   display: flex; 
   flex-direction: column;
   /* border-radius: var(--my-boder-radius); */
@@ -166,24 +184,29 @@ html, body {
 }
 
 .sidebar-info {
-  padding: 10px 8px;
+  padding: 2px 8px 30px 8px;
   border-radius: 6px;
   border: var(--white);
   font-size: var(--fsize_big);
   border-radius: var(--my-boder-radius);
 }
 
+.sidebar-item-container {
+  gap:16px;
+  display: flex;
+  flex-direction: column;
+  padding: 2px 15px 2px 15px ;
+}
 
 .sidebar-item {
-  padding: 10px 8px;
-  /* border-radius: 6px; */
+  padding: 4px 0px;
+  background-color: var(--balck);
   cursor: pointer;
-  margin-top:1px;
-  margin-bottom: 1px;
   font-size:  var(--fsize_middle);
   color: var(--white);
-  border: solid 2px var(--myshadow);
-  border-radius: var(--my-boder-radius);
+  border: outset 2px var(--myshadow);
+  /* border-radius: var(--my-boder-radius); */
+  text-align: center;
 
 }
 
@@ -195,7 +218,7 @@ html, body {
   font-size:  var(--fsize_middle);
   color: var(--white);
   /* bottom: 2%; */
-  border-top: 2px solid var(--white);
+  border-top: 2px ridge var(--white);
   border-radius: var(--my-boder-radius);
 }
 
@@ -204,34 +227,22 @@ html, body {
   /* color: var(--blue); */
 }
 /* 右侧主区域 */
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-/* 文件区域滚动不变 */
-.file-container {
-  flex: 1;
-  overflow: auto;
-}
+
 
 
 /* 复选框列 - 默认隐藏，多选模式下显示 */
 .check-col { width: 36px; text-align: center; }
 .check-col input[type="checkbox"] {
-  display: none;
+  display:"" ;
   width: 16px;
   height: 16px;
   cursor: pointer;
 }
-.multi-select-active .check-col input[type="checkbox"] { display: inline-block; }
-
 /* 右键菜单 */
 .context-menu {
   position : fixed;
   background : var(--white);
-  /* border : 1px solid var(--balck); */
+  /* border : 2px solid var(--white); */
   /* box-shadow : 2px 2px 6px var(--balck_alpha); */
   z-index : 1000;
   border-radius: var(--my-boder-radius);
@@ -244,11 +255,11 @@ html, body {
   font-size: var(--fsize_middle);
   width : 100%;
   padding : 6px 12px;
-  background : var(--white);
+  background : var(--ironblack);
   cursor : pointer;
-  color: var(--balck);
+  color: var(--white);
   /* border-radius: var(--my-boder-radius); */
-  border-bottom: 1px solid var(--balck);; 
+  border: 3px ridge var(--ironblack_light);; 
 }
 .context-menu .menu-item:hover { background: var(--blue); }
 
@@ -265,21 +276,31 @@ html, body {
 
 
 .modal-overlay {
-  position: fixed; inset: 0; background: var(--balck_alpha);
+  position: fixed; inset: 0; background: var(--ironblack_alpha);
   display: flex; align-items: center; justify-content: center; z-index: 999;
 }
 .modal-box {
-  background: var(--white); padding: 12px; border-radius: 0px;
-  min-width: 720px; box-shadow: 0 8px 30px var(--balck);
+  background: var(--white);
+  min-width: 720px; 
+  box-shadow: 0 8px 30px var(--balck);
   justify-content: center;
+  align-items: center;
 }
-.modal-title { margin: 0 0 12px; font-size: var(--fsize_middle);background-color: var(--balck);color: var(--white); justify-content:center;}
+.modal-title { 
+  padding: 12px; 
+  font-size: var(--fsize_larger);
+  background-color: var(--ironblack);
+  color: var(--white);
+  text-align: center;
+  /* border: 2px inset var(--white); */
+  /* font-weight: 300; */
+}
 .modal-input {
-  width: 100%; padding: 6px 12px; border: 1px solid var(--white);
-  border-radius: 0px; font-size: 1rem; margin-bottom: 16px;
+  width: 100%; padding: 6px 12px; border: 2px solid var(--white);
+  border-radius: 0px ; font-size: 1rem;
   box-sizing: border-box;
 }
-.modal-error { display:flex;padding: 2px 12px;font-size: var(--fsize_small);justify-content: center;}
+.modal-error { display:flex;padding: 2px 12px;font-size: var(--fsize_small);justify-content: center;color: red;}
 .modal-btn-container{
   display: flex;
   padding-top: 8px;
@@ -290,10 +311,9 @@ html, body {
   gap: 30px;
   /* align-items: ; */
 }
-.modal-btn { padding: 8px 10px;
+.modal-btn { padding: 4px 10px;
   display: flex; 
   justify-content: center; 
-  /* gap: 30px;  */
   width: 100%;
   font-size: var(--fsize_middle);
   color: var(--white);
@@ -302,7 +322,7 @@ html, body {
 .modal-btn:hover{background: var(--blue); }
 
 .previewer {
-  background: var(--balck_alpha);   /* 半透明遮罩 */
+  background: var(--ironblack_alpha);   /* 半透明遮罩 */
   position: fixed;                   /* 固定定位，覆盖全屏 */
   inset: 0;                          /* top:0;right:0;bottom:0;left:0 */
   display: flex;
@@ -315,11 +335,11 @@ html, body {
 }
 
 .text-editor {
-  width: 50%;
+  width: 70%;
   height: 100%;
   border: var(--balck);
   font-family: monospace;
-  font-size:var(--fsize_middle);
+  font-size:20px;
   padding-top: 18px;
   padding-bottom: 18px;
   padding-left: 36px;
@@ -329,75 +349,98 @@ html, body {
   background: var(--white);
 }
 
+.tree-layout {
+    position: relative;
+    width: var(--tree-width);
+    height: var(--tree-height);
+    overflow: scroll;
+    overflow: visible;
+}
+
+.tree-lines {
+    position: absolute;
+    left:0;
+    top:0;
+    width: var(--tree-width);
+    height: var(--tree-height);
+    overflow: visible;
+}
+
+.tree-line{
+  stroke:var(--ironblack);
+  stroke-width:2;
+  fill: none;
+}
+
+.tree-node {
+  position:absolute;
+  font: var(--fsize_middle);
+  border: 3px outset var(--ironblack);
+  background: var(--ironblack_light);
+  cursor: pointer;
+  color: var(--white);
+  border-radius: var(--my-boder-radius);
+  padding-left: 12px;
+  text-align: left;
+}
+
+.tree-node:hover {
+  background: var(--balck);
+}
+.zone-container{
+  /* min-height: 100%; */
+  padding-top: 10%;
+  display: flex;
+  flex-direction: column;
+  gap: 15%;
+  /* justify-content: center; */
+  align-items: center;
+}
+.zone{
+  width: 80%;
+  font: var(--fsize_middle);
+  border: 3px outset var(--ironblack_light);
+  background: var(--ironblack);
+  cursor: pointer;
+  color: var(--white);
+  border-radius: var(--my-boder-radius);
+  text-align: center;
+}
+.zone:hover{
+  background: var(--balck);
+}
 
 
-</style>
-</head>
-<body>
+
+.check-group {
+  padding: 20px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  max-width: 100%;
+}
+.check-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
 
 
 
-
-<div class="layout">
-
-  <!-- 左侧栏（新增） -->
-  <div class="sidebar">
-    <div class="sidebar-title"><a href="https://guanbinwu.github.io" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;" >FileViewer v0.1.0</a></div>
-    <div class="sidebar-info">欢迎,</div>
-    <div class="sidebar-info" id="sidebar-username"></div>
-    <div class="sidebar-item" id ="mainPage">回到首页</div>
-    <div class="sidebar-item" id ="upLoadFiles" title="上传一个或多个文件，但不能包含文件夹">上传文件</div>
-    <div class="sidebar-item" id ="upLoadFolder" title="选择一个文件夹，会上传包含的所有子文件与子文件夹（递归）">上传文件夹</div>
-    <div class="sidebar-item" id = "log" title="查看最新的50条用户记录">查看日志</div>
-    <div class="sidebar-item" id = "setting" >设置</div>
-    <div class="sidebar-item" id ="logout">登出</div>
-    <div class="sidebar-footer">
-      <p>单击目录：进入目录</p>
-      <p>双击文件：预览/编辑</p>
-      <p>右键单击：打开菜单</p>
-      <p>如果不能再见到你，祝你早、午、晚都安。</p>
-    </div>
-  </div>
-
-  <!-- 右侧主内容（原内容整体移动进来） -->
-   
-  <div class="main">
-
-    <!-- 工具栏 -->
-    <div class="toolbar">
-      
-      <button class="btn" id="mkdir">📁新建文件夹</button>
-      
-      <button class="btn" id="refreshBtn" >⟳ 刷新</button>
-      <button class="btn" id="parentBtn">⬆ 回到上级</button>
-      <div class="path" id="currentPath"></div>
-      <button class="btn primary" id="multiSelectBtn">☐ 多选模式</button>
-      <button class="btn danger" id="cancelSelectBtn" style="display:none;">取消选择</button>
-      <span class="selected-info" id="selectedInfo"></span>
-    </div>
-
-    <!-- 文件列表 -->
-    <div class="file-container" id="fileContainer">
-      <table class="file-table" id="fileTable">
-        <thead id="fileTableThead">
-
-        </thead>
-        <tbody id="fileBody"></tbody>
-      </table>
-      <div class="loading" id="loadingState">到底部了</div>
-      <div class="error" id="errorState" style="display:none;"></div>
-    </div>
-
-  </div>
-  <!-- <div class="sidebar" style="width: 2px;border: none;"> </div> -->
-</div>
-
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script> -->
-<script  src="/static/script/utils.js"></script>
-<script  src="/static/script/api.js"></script>
-<script  src="/static/script/render.js"></script>
-<script  src="/static/script/spark_md5.js"></script>
-<script type="module" src="/static/script/main.js"></script>
-
-</body>
-</html>
+.spinner {
+  /* position: relative;
+  top: 50%;
+  left: 50%; */
+  width: 54px;
+  height: 54px;
+  border: 3px solid #ccc;
+  border-top-color: #333;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

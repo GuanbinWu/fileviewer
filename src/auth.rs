@@ -64,7 +64,10 @@ pub enum UserAction {
     Rename,
     CpFile,
     Chown,
-    
+    CreateZone,
+    RenameZone,
+    UpdateZoneLords,
+
 }
 
 impl std::fmt::Display for UserAction{
@@ -89,44 +92,22 @@ pub async fn regist(account:Account,conf:Arc<Config>,store:Arc<Store>)->Result<(
 
     let Account { username: name, password } =account;
 
-    store.append_log(Event {
-        user: name.clone(),
-        action: UserAction::Regist.to_string(),
-        time: Utc::now(),
-        status: Attempt::Try.to_string(),
-        filepath: "login/regist".to_string(),
-        args: String::new(),
-    }).await?;
-
-    //用户名是否合法
     let _ = is_valid_user_name(&name, conf.clone()).await?;
 
-    //密码是否合法
     let _=is_vaild_pwd(&password, conf).await?;
-    
-    //查询数据库是否重名
-    let exists = store.query_username(&name).await?;
 
-    println!("数据库无重名！");
-    //加密
-    let hashed=hash_passwd(&password);
-    println!("密码已被加密为{}",hashed);
+    match store.query_username(&name).await {
+        Err(FVErrors::AuthError(AuthError::NoSuchUser))=>{
+            dbg!("数据库无重名！");
+            let hashed=hash_passwd(&password);
+            dbg!("密码已被加密为",&hashed);
 
+            store.new_account(&name, hashed).await?;
 
-    //数据库新增用户
-    store.new_account(&name, hashed).await?;
-
-    //日志记录
-    store.append_log(Event {
-        user: name.clone(),
-        action: UserAction::Regist.to_string(),
-        time: Utc::now(),
-        status: Attempt::Success.to_string(),
-        filepath: "login/regist".to_string(),
-        args: String::new(),
-    }).await?;
-    
-    Ok(())
+            Ok(())
+        },
+        _=>Err(FVErrors::NotFound)
+    }    
 }
 
 async fn verify_current_user(account:Account,conf:Arc<Config>,store:Arc<Store>)->Result<(),FVErrors>{
@@ -145,15 +126,7 @@ async fn verify_current_user(account:Account,conf:Arc<Config>,store:Arc<Store>)-
 
 pub async fn update_pwd(account:Account,new_pwd:String,conf:Arc<Config>,store:Arc<Store>)->Result<(),FVErrors>{
     let Account { username: name, password }=account.clone();
-    store.append_log(Event {
-        user: name.clone(),
-        action: UserAction::UpdatePassword.to_string(),
-        time: Utc::now(),
-        status: Attempt::Try.to_string(),
-        filepath: "login/regist".to_string(),
-        args: String::new(),
-    }).await?;
-    //查询当前用户是否正确
+
     let v=verify_current_user(account, conf.clone(),store.clone()).await?;
     
     //新密码是否合法
@@ -179,19 +152,12 @@ pub async fn update_pwd(account:Account,new_pwd:String,conf:Arc<Config>,store:Ar
 
 pub async fn delete_account(account:Account,conf:Arc<Config>,store:Arc<Store>)->Result<(),FVErrors>{
     let Account { username: name, password }=account.clone();
-    store.append_log(Event {
-        user: name.clone(),
-        action: UserAction::DeleteAccount.to_string(),
-        time: Utc::now(),
-        status: Attempt::Try.to_string(),
-        filepath: "login/regist".to_string(),
-        args: String::new(),
-    }).await?;
+
 
     //查询原密码是否正确
     let _=verify_current_user(account, conf.clone(),store.clone()).await?;
     //数据库删除用户
-    store.remove_account(name.clone()).await?;
+    store.del_account(name.clone()).await?;
 
     //日志记录
     store.append_log(Event {
@@ -208,14 +174,7 @@ pub async fn delete_account(account:Account,conf:Arc<Config>,store:Arc<Store>)->
 pub async fn login(account:Account,conf:Arc<Config>,store:Arc<Store>)->Result<(),FVErrors>{
     //验证当前用户
     let Account { username: name, password }=account.clone();
-    store.append_log(Event {
-        user: name.clone(),
-        action: UserAction::Login.to_string(),
-        time: Utc::now(),
-        status: Attempt::Try.to_string(),
-        filepath: "login".to_string(),
-        args: String::new(),
-    }).await?;
+
     let _=verify_current_user(account, conf,store.clone()).await?;
 
     //日志记录
@@ -234,14 +193,7 @@ pub async fn login(account:Account,conf:Arc<Config>,store:Arc<Store>)->Result<()
 
 pub async fn record_logout(conf:Arc<Config>,store:Arc<Store>,session:Session)->Result<(),FVErrors>{
     let name =session.username;
-     store.append_log(Event {
-        user: name.clone(),
-        action: UserAction::Logout.to_string(),
-        time: Utc::now(),
-        status: Attempt::Try.to_string(),
-        filepath: "login/logout".to_string(),
-        args: String::new(),
-    }).await?;
+
 
      store.append_log(Event {
         user: name.clone(),
@@ -376,6 +328,13 @@ pub struct Session{
     pub nbf:DateTime<Utc>,
 }
 
+impl Default for Session {
+    fn default() -> Self {
+    Session{exp:Utc::now(),username:String::new(),nbf:Utc::now(),
+    }
+}
+}
+
 pub fn verify_token(token:&str)->Result<Session,String>{
     if token.is_empty() {
         return Err("Token is empty".to_string());
@@ -407,4 +366,18 @@ pub fn auth() -> impl Filter<Extract = (Session,), Error = Rejection> + Clone {
                 }
             }
         })
+}
+
+
+
+#[cfg(test)]
+mod tests{
+use super::*;
+
+    #[test]
+    fn verifyToken(){
+        let token = create_token("Wuguanbin", 1,Utc::now());
+        let session = verify_token(&token);
+        println!("{:?}",session);
+    }
 }

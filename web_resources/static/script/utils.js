@@ -1,3 +1,37 @@
+export function testTree(){
+    const relations = [
+        ["/a2new/a4","/a2new"],
+        ["/bbb/TC/TC2/湾谷海报","/bbb/TC/TC2"],
+        ["/a2new/湾谷海报自建","/a2new"],
+        ["/a2new","/"],
+        ["/ccc/ihj","/ccc"],
+        ["/bbb","/"],
+        ["/nnn","/"],
+        ["/UH","/"],
+        ["/ccc/a2_cp/a4","/ccc/a2_cp"],
+        ["/bbb/TC","/bbb"],
+        ["/ccc","/"],
+        ["/fast","/"],
+        ["/slow","/"],
+        ["/fast/a3","/fast"],
+        ["/mmm","/"],
+        ["/ccc/dpd","/ccc"],
+        ["/bbb/TC/TC2/湾谷海报/高分辨率图象","/bbb/TC/TC2/湾谷海报"],
+        ["/bbb/TC/TC2","/bbb/TC"],
+        ["/ccc/a2_cp","/ccc"],
+    ]
+    return relations;
+}
+
+
+
+
+const compoundExtensions = [
+  ".tar.gz",
+  ".tar.bz2",
+  ".tar.xz"
+];
+
 export class Path{
     constructor(segments = []){
         this.segment=segments
@@ -15,6 +49,10 @@ export class Path{
 
     push_clone(seg){
         return new Path([...this.segment, seg]);
+    }
+    push_path(path){
+        let tmp=this.segment.concat(path.segment);
+        return new Path(tmp);
     }
     
     pop_clone(){
@@ -62,18 +100,34 @@ export class Path{
     }
     get_suffix(){
         const tmp = this.segment[this.segment.length - 1];
-        const dotIndex = tmp.indexOf(".");
+        let dotIndex = tmp.lastIndexOf(".");
+        for (const ext of compoundExtensions) {
+            if (tmp.endsWith(ext)) {
+            dotIndex = filename.length - ext.length;
+            }
+        }
+        
         if (dotIndex === -1) {
             return "";
         }
         return tmp.substring(dotIndex);
     }
     add_suffix(suffix){
+        if (suffix == ""){
+            return this;
+        }
         const last = this.segment[this.segment.length - 1];
         this.segment[this.segment.length - 1] = last + (suffix.startsWith('.') ? '' : '.') + suffix;
         return this;
     }
 
+    rm_suffix(){
+        const suffix = this.get_suffix();
+        const tmp = this.segment[this.segment.length - 1];
+        const idx = tmp.length -suffix.length
+        this.segment[this.segment.length - 1] = tmp.substring(0,idx);
+        return this;
+    }
 }
 
 
@@ -112,3 +166,4 @@ export class FMT{
     return `${size.toFixed(2)} ${units[index]}`;
     }
 }
+

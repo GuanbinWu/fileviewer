@@ -15,6 +15,8 @@ pub enum FVErrors{
     NotFound,
     #[error("IO Error")]
     IOError(String),
+    #[error("Path Error")]
+    PathError(#[from] PathError)
 }
 
 #[derive(Debug,Error)]
@@ -46,8 +48,11 @@ pub enum AuthError{
     NoSuchUser,
 }
 
-
-
+#[derive(Error,Debug)]
+pub enum PathError {
+    #[error("路径处理失败")]
+    E101
+}
 
 impl warp::reject::Reject for DbError {}
 impl warp::reject::Reject for FVErrors {}
@@ -59,5 +64,6 @@ pub fn error_to_rejection(e:FVErrors)->warp::reject::Rejection{
         FVErrors::AuthError(v) =>warp::reject::custom(v),
         FVErrors::NotFound =>warp::reject::reject(),
         FVErrors::IOError(e)=>warp::reject::reject(),
+        FVErrors::PathError(e)=>warp::reject::reject(),
     }
 }
